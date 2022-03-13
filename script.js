@@ -12,8 +12,6 @@ let blackBG;
 let restartButton;
 let scene;
 let flag = false;
-let keyPause;
-let isRunning = true;
 
 
 function init() {
@@ -114,28 +112,10 @@ function create() {
   restartButton.on("pointerdown", restartGame);
   restartButton.visible = false;
 
-  // Get input character from your keyboard
-  this.input.keyboard.on("keydown", function (event) {
-    switch (event.keyCode) {
-      case Phaser.Input.Keyboard.KeyCodes.ESC: {
-        onPause();
-        break;
-      }
-      case Phaser.Input.Keyboard.KeyCodes.G: {
-        onPause();
-        loadScore();
-        break;
-      }
-      default: {
-        onResume();       
-        break;
-      }
-    }
-  });
 }
 
 function update() {
-  if (!gameOver && isRunning) {
+  if (!gameOver) {
     // animate background image
     background.tilePositionX += bgSpeed;
     floor.tilePositionX += bgSpeed;
@@ -158,33 +138,11 @@ function update() {
 
     // If distance > 10 call quadric equations event
     // Flag make sure call function once
-    if (distance > 1.0 && !flag) bindEvent();
+    if (distance > 10.0 && !flag) bindEvent();
   }
-  if (!isRunning) {
-    onPause();
-  }
+
 }
 
-function onPause() {
-  isRunning = false;
-  canJump = false;
-  // Stop animate background image
-  background.tilePositionX += 0;
-  floor.tilePositionX += 0;
-  //Stop update rock position every frame
-  rock.x += 0;
-
-  //Stop dino animations
-  player.anims.stop();
-}
-
-function onResume(){
-  isRunning = true;
-  canJump = true;
-
-  //Dino runs again
-  player.anims.play("dino_run");
-}
 // check if player is on the floor then set canJump to true
 function onTheFloor() {
   canJump = true;
@@ -206,7 +164,6 @@ function onGameOver() {
   player.body.setEnable(false);
   blackBG.visible = true;
   restartButton.visible = true;
-  saveScore(distance.toFixed(2));
 }
 
 // restart game
@@ -292,32 +249,4 @@ function solveChallenge(param) {
   }
 }
 
-/**
- * This function save your score to local storage
- * @param {Double} score is distance value
- */
-function saveScore(score) {
-  // An object store in local storage with date time and your score
-  const myScore = {
-    time: "2022/12/01",
-    score: 0.75,
-  };
-
-  //Parse datetime to fomrat YYYY/MM/dd
-  myScore.time = new Date().toJSON().slice(0, 10).replace(/-/g, "/");
-  myScore.score = score;
-
-  //Get score in local storage
-  let localData = window.localStorage.getItem("score");
-  if (localData) {
-    localData = JSON.parse(localData);
-  } else {
-    // Initial list for first time
-    localData = [];
-  }
-
-  // Add and save to local storage
-  localData.push(myScore);
-  localStorage.setItem("score", JSON.stringify(localData));
-}
 
